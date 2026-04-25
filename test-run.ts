@@ -101,7 +101,7 @@ Requirements:
 - Focus on careers where human skills (creativity, empathy, leadership) matter`;
 
   const result = await model.generateContent(prompt);
-  console.log("Finish Reason:", result.response.candidates[0].finishReason); const text = result.response.text();
+  console.log("Finish Reason:", result.response.candidates?.[0]?.finishReason); const text = result.response.text();
 
   // Extract JSON from response (handles any stray markdown fences)
   const jsonMatch = text.match(/\{[\s\S]*\}/);
