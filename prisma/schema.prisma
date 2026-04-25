@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String?
+  avatar        String?
+  bio           String?
+  provider      String    @default("local")
+  emailVerified Boolean   @default(false)
+  verifyToken   String?
+  resetToken    String?
+  resetTokenExp DateTime?
+  refreshToken  String?
+  currentJobTitle String?
+  skills        String[]
+
+  roadmaps  RoadmapResult[]
+  posts     Post[]
+  comments  Comment[]
+  likes     PostLike[]
+  savedJobs SavedJob[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model RoadmapResult {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inputSkills      String[]
+  jobTitle         String
+  displacementRisk Float
+  safeAlternatives Json
+  roadmapData      Json
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Post {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  likesCount Int       @default(0)
+  comments  Comment[]
+  likes     PostLike[]
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model PostLike {
+  id     String @id @default(cuid())
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String
+  jobTitle  String
+  company   String
+  location  String?
+  url       String
+  savedAt   DateTime @default(now())
+
+  @@unique([userId, jobId])
+  @@index([userId])
+}
